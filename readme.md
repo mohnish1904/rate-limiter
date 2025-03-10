@@ -50,6 +50,9 @@ For detail explanation refer official documentation -
  - Capacity : Number of tokens in the bucket.
  - Refill : Refill specifies how fast tokens can be refilled after it was consumed from a bucket.
 
+> https://en.wikipedia.org/wiki/Token_bucket
+ 
+ 
 ### Required dependencies :
 ```
 implementation 'com.bucket4j:bucket4j-core:8.7.0'
