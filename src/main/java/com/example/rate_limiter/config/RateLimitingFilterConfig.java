@@ -5,6 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -22,12 +23,16 @@ public class RateLimitingFilterConfig implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
 
+        // get http session
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         HttpSession session = httpRequest.getSession(true);
 
-        String appKey = "some-app-key"; // here we can define custom logic for getting app key
+        // here we can define custom logic for getting app key
+        String appKey = "some-app-key";
+
 
         Bucket bucket = (Bucket) session.getAttribute("throttler-" + appKey);
+
         if (bucket == null) {
             bucket = rateLimiterConfig.bucket();
             session.setAttribute("throttler-" + appKey, bucket);
@@ -36,14 +41,6 @@ public class RateLimitingFilterConfig implements Filter {
         if (rateLimiterConfig.bucket().tryConsume(1)){
             filterChain.doFilter(servletRequest, servletResponse); // Pass the request, when not rate limited
         } else
-            ((HttpServletResponse) servletResponse).setStatus(429); // Exception for too much request
+            ((HttpServletResponse) servletResponse).setStatus(HttpStatus.TOO_MANY_REQUESTS.value()); // Exception for too much request
     }
-
-//    @Override
-//    public void init(FilterConfig filterConfig) throws ServletException {
-//        // init bucket registry
-//        buckets = Bucket4jJCache
-//                .entryProcessorBasedBuilder(cache)
-//                .build();
-//    }
 }
